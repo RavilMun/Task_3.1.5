@@ -25,7 +25,7 @@ public class UserController {
     public String showUserPage(Principal principal, Model model) {
         User user = userDetails.getUserByUsername(principal.getName());
         model.addAttribute("user", user);
-        return "user";
+        return "userInfo";
     }
 
 }

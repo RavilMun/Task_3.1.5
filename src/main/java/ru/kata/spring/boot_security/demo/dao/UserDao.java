@@ -13,7 +13,7 @@ public interface UserDao {
 
     void deleteUser(Long userId);
 
-    List<User> index();
+    List<User> getAllUsers();
 
     void updateUser(User user);
 

@@ -8,10 +8,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.dao.UserDao;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -19,13 +19,37 @@ public class UserDetailsServiceImpl implements UserService, UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserDao userDao;
+    private final RoleService roleService;
 
     @Autowired
-    public UserDetailsServiceImpl(PasswordEncoder passwordEncoder, UserDao userDao) {
+    public UserDetailsServiceImpl(PasswordEncoder passwordEncoder, UserDao userDao, RoleService roleService) {
         this.passwordEncoder = passwordEncoder;
         this.userDao = userDao;
+        this.roleService = roleService;
     }
 
+    @Override
+    public void setUserRoles(User user, String[] selectedRoles) {
+        Set<Role> userRoles = new HashSet<>();
+        for (String role : selectedRoles) {
+            userRoles.add(roleService.getRole(role));
+        }
+        user.setRoles(userRoles);
+    }
+
+    @Override
+    @Transactional
+    public void createUserWithRoles(User user, String[] selectedRoles) {
+        setUserRoles(user, selectedRoles);
+        create(user);
+    }
+
+    @Override
+    @Transactional
+    public void editUserWithRoles(User user, String[] selectedRoles) {
+        setUserRoles(user, selectedRoles);
+        update(user);
+    }
 
     @Override
     @Transactional
@@ -48,14 +72,18 @@ public class UserDetailsServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> index() {
-        return userDao.index();
+    public List<User> getAllUsers() {
+        return userDao.getAllUsers();
     }
 
     @Override
     @Transactional
     public void update(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (!user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        } else {
+            user.setPassword(getById(user.getId()).getPassword());
+        }
         userDao.updateUser(user);
     }
 

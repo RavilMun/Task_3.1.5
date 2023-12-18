@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>User Management</title>
+    <style>
+
+        .custom-btn {
+            background-color: dodgerblue;
+            color: white;
+            border-radius: 5px;
+            font-size: 20px;
+            text-align: left;
+        }
+
+        .tbody tr {
+            line-height: 30px;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="container-fluid">
+    <nav class="row bg-dark" style="height: 60px" th:object="${user}">
+        <div class="ml-4">
+            <a style="color: white; font-size: 20px; line-height: 60px; font-weight: bold "><span
+                    th:text="${user.email}"></span></a>
+        </div>
+        <div class="ml-4">
+            <a style="color: white; font-size: 20px; line-height: 60px; "> with roles: <span
+                    th:each="role : ${user.roles}"
+                    th:text="${#strings.replace(role.roleName, 'ROLE_', ' ')}"></span></a>
+        </div>
+        <div class="ml-auto mr-4 text-secondary">
+            <a href="/logout" style="color: grey;font-size: 20px; line-height: 60px; "> logout</a>
+        </div>
+    </nav>
+
+    <div class="row vh-100">
+        <div class="col-md-2 mt-3 px-0">
+            <div class="btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-lg btn-block custom-btn active" id="userButton">
+                    <input type="radio" name="options"> User
+                </label>
+            </div>
+        </div>
+
+        <div class="col-md-10 p-4" style="background-color: whitesmoke;" id="userInfo">
+            <div>
+                <H1 class="ml-4">
+                    User information-page
+                </H1>
+                <div class="border pt-2 rounded m-4" style="background-color: whitesmoke">
+                    <h3 class="ml-4" style="height: 40px">
+                        About user
+                    </h3>
+                    <div class="border-top" style="background-color: white">
+                        <div class="p-4 border-top">
+                            <table class="table table-striped" style="background-color: white">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Email</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:object="${user}">
+                                    <td th:text="${user.id}"></td>
+                                    <td th:text="${user.firstName}"></td>
+                                    <td th:text="${user.lastName}"></td>
+                                    <td th:text="${user.email}"></td>
+                                    <td th:text="${user.username}"></td>
+                                    <td>
+                                            <span th:each="role : ${user.roles}"
+                                                  th:text="${#strings.replace(role.roleName, 'ROLE_', ' ')}">
+                                            </span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
