@@ -7,9 +7,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.dao.UserDao;
-import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
 import java.util.*;
 
@@ -18,62 +17,37 @@ import java.util.*;
 public class UserDetailsServiceImpl implements UserService, UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
-    private final UserDao userDao;
-    private final RoleService roleService;
+    private final UserRepository userRepository;
 
     @Autowired
-    public UserDetailsServiceImpl(PasswordEncoder passwordEncoder, UserDao userDao, RoleService roleService) {
+    public UserDetailsServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.passwordEncoder = passwordEncoder;
-        this.userDao = userDao;
-        this.roleService = roleService;
-    }
-
-    @Override
-    public void setUserRoles(User user, String[] selectedRoles) {
-        Set<Role> userRoles = new HashSet<>();
-        for (String role : selectedRoles) {
-            userRoles.add(roleService.getRole(role));
-        }
-        user.setRoles(userRoles);
-    }
-
-    @Override
-    @Transactional
-    public void createUserWithRoles(User user, String[] selectedRoles) {
-        setUserRoles(user, selectedRoles);
-        create(user);
-    }
-
-    @Override
-    @Transactional
-    public void editUserWithRoles(User user, String[] selectedRoles) {
-        setUserRoles(user, selectedRoles);
-        update(user);
+        this.userRepository = userRepository;
     }
 
     @Override
     @Transactional
     public void create(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userDao.addUser(user);
+        userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        userDao.deleteUser(id);
+        userRepository.deleteById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getById(Long id) {
-        return userDao.getById(id);
+        return userRepository.getById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
-        return userDao.getAllUsers();
+        return userRepository.findAll();
     }
 
     @Override
@@ -84,13 +58,13 @@ public class UserDetailsServiceImpl implements UserService, UserDetailsService {
         } else {
             user.setPassword(getById(user.getId()).getPassword());
         }
-        userDao.updateUser(user);
+        userRepository.save(user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
-        return userDao.getUserByUsername(username);
+        return userRepository.getUserByUsername(username);
     }
 
     @Override

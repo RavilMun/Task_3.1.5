@@ -1,31 +1,40 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.kata.spring.boot_security.demo.DTO.UserDTO;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
 import java.security.Principal;
 
-@Controller
-@RequestMapping("/user")
+@RestController
+@RequestMapping("/api")
 public class UserController {
     private final UserService userDetails;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public UserController(UserService userDetails) {
+    public UserController(UserService userDetails, ModelMapper modelMapper) {
         this.userDetails = userDetails;
+        this.modelMapper = modelMapper;
     }
 
-    @GetMapping()
-    public String showUserPage(Principal principal, Model model) {
+    @GetMapping("/user")
+    public ResponseEntity<UserDTO> getUser(Principal principal) {
         User user = userDetails.getUserByUsername(principal.getName());
-        model.addAttribute("user", user);
-        return "userInfo";
+        UserDTO userDTO = convertToUserDto(user);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
+    private UserDTO convertToUserDto(User user) {
+        return modelMapper.map(user, UserDTO.class);
     }
 
 }

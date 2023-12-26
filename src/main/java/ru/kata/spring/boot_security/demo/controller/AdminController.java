@@ -1,50 +1,89 @@
 package ru.kata.spring.boot_security.demo.controller;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.DTO.UserDTO;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
-import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
-@Controller
-@RequestMapping("/admin")
+@RestController
+@RequestMapping("/api")
 public class AdminController {
     private final UserService userService;
+    private final RoleService roleService;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public AdminController(UserService userService) {
+    public AdminController(UserService userService, RoleService roleService, ModelMapper modelMapper) {
         this.userService = userService;
+        this.roleService = roleService;
+        this.modelMapper = modelMapper;
     }
 
-    @GetMapping()
-    public String index(Principal principal, Model model) {
-        List<User> users = userService.getAllUsers();
-        User infoUser = userService.getUserByUsername(principal.getName());
-        model.addAttribute("userInf", infoUser);
-        model.addAttribute("users", users);
-        return "AdminPage";
+    @GetMapping("/admin")
+    public ResponseEntity<List<UserDTO>> showAllUsers() {
+        return new ResponseEntity<>(userService.getAllUsers().stream().map(this::convertToUserDto).
+                collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    @PostMapping("/addUser")
-    public String create(@ModelAttribute User user, @RequestParam("roles") String[] selectedRoles) {
-        userService.createUserWithRoles(user, selectedRoles);
-        return "redirect:/admin";
+    @GetMapping("/admin/roles")
+    public ResponseEntity<List<Role>> getAllRoles() {
+        List<Role> roles = roleService.getAllRoles();
+        if (roles != null) {
+            return new ResponseEntity<>(roles, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
     }
 
-    @PostMapping("/edit")
-    public String editUserSubmit(@ModelAttribute User editedUser, @RequestParam("roles") String[] selectedRoles) {
-        userService.editUserWithRoles(editedUser, selectedRoles);
-        return "redirect:/admin";
+    @PostMapping("/admin")
+    public ResponseEntity<HttpStatus> create(@RequestBody User user) {
+        userService.create(user);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/delete")
-    public String deleteUserSubmit(@ModelAttribute User user) {
-        userService.delete(user.getId());
-        return "redirect:/admin";
+    @GetMapping("/admin/{username}")
+    public ResponseEntity<UserDTO> getUserByUsername(@PathVariable String username) {
+        UserDTO userDTO = convertToUserDto(userService.getUserByUsername(username));
+        if (userDTO != null) {
+            return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/admin/get/{id}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        UserDTO userDTO = convertToUserDto(userService.getById(id));
+        if (userDTO != null) {
+            return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/admin")
+    public ResponseEntity<HttpStatus> editUser(@RequestBody User user) {
+        userService.update(user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
+        userService.delete(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public UserDTO convertToUserDto(User user) {
+        return modelMapper.map(user, UserDTO.class);
     }
 }
