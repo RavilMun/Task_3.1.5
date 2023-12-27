@@ -46,9 +46,14 @@ public class AdminController {
     }
 
     @PostMapping("/admin")
-    public ResponseEntity<HttpStatus> create(@RequestBody User user) {
+    public ResponseEntity<UserDTO> create(@RequestBody User user) {
         userService.create(user);
-        return new ResponseEntity<>(HttpStatus.OK);
+        UserDTO userDTO = convertToUserDto(user);
+        if (userDTO != null) {
+            return new ResponseEntity<>(userDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
     }
 
     @GetMapping("/admin/{username}")

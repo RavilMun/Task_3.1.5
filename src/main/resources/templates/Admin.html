@@ -221,7 +221,13 @@
                 <form method="post"
                       class="font-weight-bold text-center text-center col-md-8"
                       id="editUserForm">
-                    <input type="hidden" name="id"/>
+                    <div class="form-group">
+                        <label>Id:</label>
+                        <input readonly class="form-control-plaintext bg-light" type="text"
+
+                               name="id"
+                        >
+                    </div>
                     <div class="form-group">
                         <label>Username:</label>
                         <input class="form-control" type="text"
@@ -290,12 +296,25 @@
             <div class="modal-body row justify-content-center">
                 <form method="post" class="font-weight-bold text-center col-md-8"
                       id="deleteUserForm">
-                    <input type="hidden" name="id"/>
+                    <div class="form-group">
+                        <label>Id:</label>
+                        <input readonly class="form-control-plaintext bg-light" type="text"
+
+                               name="id"
+                        >
+                    </div>
                     <div class="form-group">
                         <label>Username:</label>
                         <input readonly class="form-control-plaintext bg-light" type="text"
 
                                name="username" required
+                        >
+                    </div>
+                    <div class="invisible-div" style="display: none;">
+                        <label>Password:</label>
+                        <input readonly class="form-control-plaintext bg-light" type="hidden"
+
+                               name="password" required
                         >
                     </div>
                     <div class="form-group">
@@ -355,13 +374,7 @@
         integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
         crossorigin="anonymous"></script>
 
-
-<script type="module" th:src="@{/AdminButtons.js}"></script>
-<script type="module" th:src="@{/ShowAllUsers.js}"></script>
-<script type="module" th:src="@{/AddNewUser.js}"></script>
-<script type="module" th:src="@{/Roles.js}"></script>
+<script type="module" th:src="@{/admin.js}"></script>
 <script type="module" th:src="@{/UserInfo.js}"></script>
-<script type="module" th:src="@{/ModalEdit.js}"></script>
-<script type="module" th:src="@{/ModalDelete.js}"></script>
 </body>
 </html>
